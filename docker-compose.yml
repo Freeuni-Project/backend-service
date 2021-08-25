@@ -1,0 +1,38 @@
+# docker-compose.yml
+version: '3.8'
+
+volumes:
+  project_database_vol:
+
+networks:
+  micro_network:
+    external:
+      name: micro_network
+
+services:
+  project-api:
+    container_name: cproject-backend-service
+    build:
+      context: .
+    ports:
+    - "5005:5005"
+    depends_on:
+      - project-database
+    networks:
+      - micro_network
+    restart: always
+
+  project-database:
+    container_name: cproject-backend-dbase
+    image: mysql:8
+    ports:
+    - "32005:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: project-db-prod
+      MYSQL_USER: projectmanager
+      MYSQL_PASSWORD: project_manager
+    networks:
+      - micro_network
+    volumes:
+    - project_database_vol:/var/lib/mysql
