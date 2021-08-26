@@ -1,6 +1,6 @@
 # application/ticket_api/routes.py
 from . import ticket_api_blueprint
-from ..models import Ticket
+from ..models import Ticket, TicketComment
 from flask import make_response, request, jsonify
 from .. import db
 
@@ -14,6 +14,28 @@ def get_tickets():
     response = jsonify(data)
     response.headers.add('Access-Control-Allow-Origin', '*')
 
+    return response
+
+
+@ticket_api_blueprint.route('/api/ticket/<ticket_id>/add-comment', methods=['POST'])
+def post_comment(ticket_id):
+    user_id = request.json['user_id']
+    comment = request.json['comment']
+
+    ticket_comment = TicketComment()
+    ticket_comment.user_id = user_id
+    ticket_comment.comment = comment
+    ticket_comment.ticket_id = ticket_id
+    db.session.add(ticket_comment)
+    db.session.commit()
+    response = jsonify({'message': 'Comment added', 'result': ticket_comment.to_json()})
+    return response
+
+
+@ticket_api_blueprint.route('/api/ticket/<ticket_id>/get-comments', methods=['GET'])
+def get_comments(ticket_id):
+    comments = TicketComment.query.filter_by(ticket_id=ticket_id)
+    response = jsonify(json_list=[i.to_json() for i in comments])
     return response
 
 
@@ -67,6 +89,25 @@ def put_ticket(ticket_id):
     response = jsonify(ticket.to_json())
     response.headers.add('Access-Control-Allow-Origin', '*')
 
+    return response
+
+
+@ticket_api_blueprint.route('/api/ticket/<comment_id>/update-comment', methods=['PUT'])
+def put_comment(comment_id):
+    comment = TicketComment.query.filter_by(id=comment_id).first()
+    comment.comment = request.json["comment"]
+    db.session.commit()
+    response = jsonify(comment.to_json())
+    return response
+
+
+@ticket_api_blueprint.route('/api/ticket/<comment_id>/delete-comment', methods=['DELETE'])
+def delete_comment(comment_id):
+    comment = TicketComment.query.filter_by(id=comment_id).first()
+    db.session.delete(comment)
+    db.session.commit()
+
+    response = jsonify({"comment deleted": comment.comment})
     return response
 
 
