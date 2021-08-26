@@ -2,13 +2,15 @@
 from application import create_app, db
 from application import models
 from flask_migrate import Migrate  # for migrations
-
+from flask_cors import CORS, cross_origin
 from flask import g
 from flask.sessions import SecureCookieSessionInterface
 from flask_login import user_loaded_from_header
 
 app = create_app()
+cors = CORS(app)
 migrate = Migrate(app, db)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 class CustomSessionInterface(SecureCookieSessionInterface):
