@@ -58,6 +58,21 @@ def get_users(project_id):
 
     return response
 
+@project_api_blueprint.route('/api/project/<project_id>/get-users-not-added', methods=['GET'])
+def get_users_not_added(project_id):
+    project_users = ProjectUser.query.filter_by(project_id=project_id)
+    users_ids = [project_user.to_json()['user_id'] for project_user in project_users]
+
+    data = []
+    for row in User.query.filter(User.id.notin_(users_ids)).all():
+        data.append(row.to_json())
+
+    response = jsonify(json_list=data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+
+    return response
+
+
 
 @project_api_blueprint.route('/api/project/create', methods=['POST'])
 def post_create_project():
