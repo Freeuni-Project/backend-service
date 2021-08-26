@@ -46,6 +46,7 @@ class Ticket(db.Model):
     assignee_id = db.Column(db.Integer, unique=False, nullable=False)
     status = db.Column(db.String(25), unique=False, nullable=False, default="In progress")
     project_id = db.Column(db.Integer, unique=False, nullable=False)
+    comments = db.relationship('TicketComment', backref='ticketComment')
 
     def __repr__(self):
         return '<Ticket %r>' % (self.title)
@@ -67,6 +68,25 @@ class Ticket(db.Model):
             'description': self.description,
         }
 
+
+class TicketComment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), unique=False, nullable=False)
+    user_id = db.Column(db.Integer, unique=False, nullable=False)
+    comment = db.Column(db.String(255), unique=False, nullable=True, default="")
+
+    def create(self, ticket_id, user_id, comment):
+        self.ticket_id = ticket_id
+        self.user_id = user_id
+        self.comment = comment
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'ticket_id': self.ticket_id,
+            'user_id': self.user_id,
+            'comment': self.comment
+        }
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
