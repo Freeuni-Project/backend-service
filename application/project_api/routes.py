@@ -19,7 +19,7 @@ def get_projects():
 
 @project_api_blueprint.route('/api/project/<project_id>', methods=['GET'])
 def get_project(project_id):
-    project = ProjectUser.query.filter_by(id=project_id).first()
+    project = Project.query.filter_by(id=project_id).first()
 
     response = jsonify(project.to_json())
     response.headers.add('Access-Control-Allow-Origin', '*')
