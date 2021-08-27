@@ -17,6 +17,16 @@ def get_projects():
     return response
 
 
+@project_api_blueprint.route('/api/project/<project_id>', methods=['GET'])
+def get_projects(project_id):
+    project = ProjectUser.query.filter_by(id=project_id).first()
+
+    response = jsonify(project.to_json())
+    response.headers.add('Access-Control-Allow-Origin', '*')
+
+    return response
+
+
 @project_api_blueprint.route('/api/project/<project_id>/add-users', methods=['POST'])
 def post_add_users(project_id):
     users_ids = request.json['users_ids']
@@ -58,6 +68,7 @@ def get_users(project_id):
 
     return response
 
+
 @project_api_blueprint.route('/api/project/<project_id>/get-users-not-added', methods=['GET'])
 def get_users_not_added(project_id):
     project_users = ProjectUser.query.filter_by(project_id=project_id)
@@ -71,7 +82,6 @@ def get_users_not_added(project_id):
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
-
 
 
 @project_api_blueprint.route('/api/project/create', methods=['POST'])
@@ -113,7 +123,7 @@ def delete_project_user(project_id):
     db.session.delete(project_user)
     db.session.commit()
 
-    response = jsonify({"user removed from project":user_id})
+    response = jsonify({"user removed from project": user_id})
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
