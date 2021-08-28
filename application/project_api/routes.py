@@ -103,6 +103,20 @@ def post_create_project():
 
     return response
 
+@project_api_blueprint.route('/api/project/<project_id>', methods=['PUT'])
+def put_project(project_id):
+    project = Project.query.filter_by(id=project_id).first()
+    project.project_name = request.json['project_name']
+    project.description = request.json['description']
+    project.status = request.json['status']
+
+    db.session.commit()
+
+    response = jsonify({'message': 'Project updated', 'result': project.to_json()})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+
+    return response
+
 
 @project_api_blueprint.route('/api/project/<project_id>', methods=['DELETE'])
 def delete_project(project_id):
