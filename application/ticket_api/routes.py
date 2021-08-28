@@ -113,11 +113,11 @@ def delete_comment(comment_id):
 
 @ticket_api_blueprint.route('/api/ticket/<ticket_id>', methods=['DELETE'])
 def delete_ticket(ticket_id):
-    ticket = Ticket.query.filter_by(id=ticket_id).first()
-    db.session.delete(ticket)
+    Ticket.query.filter_by(id=ticket_id).delete()
+
     db.session.commit()
 
-    response = jsonify({"ticket deleted": ticket.title})
+    response = jsonify({"ticket deleted": ticket_id)
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
