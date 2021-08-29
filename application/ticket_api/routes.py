@@ -1,8 +1,11 @@
 # application/ticket_api/routes.py
+import json
+
 from . import ticket_api_blueprint
 from ..models import Ticket, TicketComment
 from flask import make_response, request, jsonify
 from .. import db
+from producer import publish
 
 
 @ticket_api_blueprint.route('/api/tickets', methods=['GET'])
@@ -62,6 +65,7 @@ def post_create():
     response = jsonify({'message': 'Ticket added', 'result': ticket.to_json()})
     response.headers.add('Access-Control-Allow-Origin', '*')
 
+    publish("new_ticket", ticket.to_json())
     return response
 
 
@@ -89,6 +93,8 @@ def put_ticket(ticket_id):
     response = jsonify(ticket.to_json())
     response.headers.add('Access-Control-Allow-Origin', '*')
 
+    if ticket.status == 'Done':
+        publish("done_ticket", ticket.to_json())
     return response
 
 
@@ -117,10 +123,13 @@ def delete_ticket(ticket_id):
 
     db.session.commit()
 
-    response = jsonify({"ticket deleted": ticket_id)
+    response = jsonify({"ticket deleted": ticket_id})
     response.headers.add('Access-Control-Allow-Origin', '*')
 
+    params = {'ticket_id': ticket_id}
+    publish("delete_ticket", params)
     return response
+
 
 @ticket_api_blueprint.route('/api/tickets/projects/<project_id>', methods=['GET'])
 def get_project_tickets(project_id):
@@ -130,6 +139,7 @@ def get_project_tickets(project_id):
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
+
 
 @ticket_api_blueprint.route('/api/tickets/assignee/projects/<project_id>', methods=['GET'])
 def get_user_tickets_by_user(project_id):
