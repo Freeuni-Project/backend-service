@@ -84,7 +84,7 @@ def post_login():
             db.session.commit()
             login_user(user)
 
-            return make_response(jsonify({'message': 'Logged in', 'api_key': user.api_key}))
+            return make_response(jsonify({'message': 'Logged in', 'data': user.to_json()}))
     response = make_response(jsonify({'message': 'Not logged in'}), 401)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
