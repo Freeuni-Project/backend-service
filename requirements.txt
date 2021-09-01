@@ -41,3 +41,4 @@ docker==5.0.0
 pytest==6.2.4
 flask-cors==3.0.10
 pika==1.2.0
+PyJWT==2.1.0
