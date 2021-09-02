@@ -1,5 +1,6 @@
 # Dockerfile
 FROM python:3.9
+ENV PYTHONUNBUFFERED 1
 COPY requirements.txt /project-manager-app/requirements.txt
 WORKDIR /project-manager-app
 RUN pip install -r requirements.txt

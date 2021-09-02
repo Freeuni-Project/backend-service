@@ -6,6 +6,7 @@ from .. import db, login_manager
 from ..models import User
 from flask import make_response, request, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
+import requests
 
 from passlib.hash import sha256_crypt
 
@@ -80,7 +81,8 @@ def post_login():
     user = User.query.filter_by(username=username).first()
     if user:
         if sha256_crypt.verify(str(request.json['password']), user.password):
-            user.encode_api_key()
+            key = requests.get('http://ckong-api-gateway:8001/consumers/loginserverissuer/jwt').json()["data"][0]["key"]
+            user.encode_api_key(key)
             db.session.commit()
             login_user(user)
 

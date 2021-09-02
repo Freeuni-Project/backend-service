@@ -3,6 +3,7 @@ from . import db
 from datetime import datetime
 from flask_login import UserMixin
 from passlib.hash import sha256_crypt
+import jwt
 
 
 class User(UserMixin, db.Model):
@@ -16,8 +17,15 @@ class User(UserMixin, db.Model):
     authenticated = db.Column(db.Boolean, default=False)
     api_key = db.Column(db.String(255), unique=True, nullable=True)
 
-    def encode_api_key(self):
-        self.api_key = sha256_crypt.hash(self.username + str(datetime.utcnow))
+    def encode_api_key(self, key):
+        # self.api_key = sha256_crypt.hash(self.username + str(datetime.utcnow))
+        self.api_key = jwt.encode(
+            {"username": self.username, "exp": 1900000000},
+            "freeuni_project_secret",
+            # algorithm="HS256",
+            headers={"alg": "HS256",
+                     "typ": "JWT",
+                     "kid": key})
 
     def encode_password(self):
         self.password = sha256_crypt.hash(self.password)
@@ -87,6 +95,7 @@ class TicketComment(db.Model):
             'user_id': self.user_id,
             'comment': self.comment
         }
+
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
