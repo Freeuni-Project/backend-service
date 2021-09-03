@@ -4,6 +4,7 @@ from ..models import Project, ProjectUser, User
 from .. import db
 from flask import make_response, request, jsonify
 import requests
+from producer import publish
 
 
 @project_api_blueprint.route('/api/projects', methods=['GET'])
@@ -36,6 +37,7 @@ def post_add_users(project_id):
         project_user.project_id = project_id
         project_users.append(project_user)
         db.session.add(project_user)
+        publish('add_user_to_project', {"title": get_project_name(project_id), "email": get_user_email(user_id)}, 'mail_queue')
 
     db.session.commit()
 
@@ -136,8 +138,18 @@ def delete_project_user(project_id):
     project_user = ProjectUser.query.filter_by(project_id=project_id, user_id=user_id).first()
     db.session.delete(project_user)
     db.session.commit()
+    publish('remove_user_from_project', {"title": get_project_name(project_id), "email": get_user_email(user_id)}, 'mail_queue')
 
     response = jsonify({"user removed from project": user_id})
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
+
+
+def get_user_email(user_id):
+    user = User.query.filter_by(id=user_id).first()
+    return user.email
+
+def get_project_name(project_id):
+    project = Project.query.filter_by(id=project_id).first()
+    return project.project_name

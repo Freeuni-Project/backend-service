@@ -2,7 +2,7 @@
 import json
 
 from . import ticket_api_blueprint
-from ..models import Ticket, TicketComment
+from ..models import Ticket, TicketComment, User
 from flask import make_response, request, jsonify
 from .. import db
 from producer import publish
@@ -59,13 +59,14 @@ def post_create():
     ticket.description = description
     ticket.status = status
 
+    publish('assign_to_ticket', {"title" : title, "email" : get_user_email(ticket.assignee_id)}, 'mail_queue')
     db.session.add(ticket)
     db.session.commit()
 
     response = jsonify({'message': 'Ticket added', 'result': ticket.to_json()})
     response.headers.add('Access-Control-Allow-Origin', '*')
 
-    publish("new_ticket", ticket.to_json())
+    publish("new_ticket", ticket.to_json(), 'stat_queue')
     return response
 
 
@@ -93,8 +94,10 @@ def put_ticket(ticket_id):
     response = jsonify(ticket.to_json())
     response.headers.add('Access-Control-Allow-Origin', '*')
 
+    publish('update_ticket_assignee', {"title" : ticket.title, "email" : get_user_email(ticket.assignee_id)}, 'mail_queue')
+    publish('update_ticket_reporter', {"title" : ticket.title, "email" : get_user_email(ticket.reporter_id)}, 'mail_queue')
     if ticket.status == 'Done':
-        publish("done_ticket", ticket.to_json())
+        publish("done_ticket", ticket.to_json(), 'stat_queue')
     return response
 
 
@@ -119,7 +122,8 @@ def delete_comment(comment_id):
 
 @ticket_api_blueprint.route('/api/ticket/<ticket_id>', methods=['DELETE'])
 def delete_ticket(ticket_id):
-    Ticket.query.filter_by(id=ticket_id).delete()
+    ticket = Ticket.query.filter_by(id=ticket_id).first()
+    ticket.delete()
 
     db.session.commit()
 
@@ -127,7 +131,9 @@ def delete_ticket(ticket_id):
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     params = {'ticket_id': ticket_id}
-    publish("delete_ticket", params)
+    publish("delete_ticket", params, 'stat_queue')
+    publish('delete_ticket_assignee', {"title" : ticket.title, "email" : get_user_email(ticket.assignee_id)}, 'mail_queue')
+    publish('delete_ticket_reporter', {"title" : ticket.title, "email" : get_user_email(ticket.reporter_id)}, 'mail_queue')
     return response
 
 
@@ -185,3 +191,8 @@ def get_users_tickets(project_id):
     response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
+
+
+def get_user_email(user_id):
+    user = User.query.filter_by(id=user_id).first()
+    return user.email
