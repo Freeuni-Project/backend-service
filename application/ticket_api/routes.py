@@ -86,6 +86,7 @@ def get_ticket(ticket_id):
 def put_ticket(ticket_id):
     ticket = Ticket.query.filter_by(id=ticket_id).first()
     ticket.assignee_id = request.json["assignee_id"]
+    ticket.reporter_id = request.json["reporter_id"]
     ticket.description = request.json["description"]
     ticket.title = request.json["title"]
     ticket.status = request.json["status"]
