@@ -141,6 +141,7 @@ class ProjectUser(db.Model):
     def to_json(self):
         return {
             'user_id': self.user_id,
+            'project_id': self.project_id,
         }
 
 
@@ -155,4 +156,5 @@ class ProjectTicket(db.Model):
     def to_json(self):
         return {
             'ticked_id': self.ticket_id,
+            'project_id': self.project_id,
         }

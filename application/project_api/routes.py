@@ -70,6 +70,21 @@ def get_users(project_id):
 
     return response
 
+@project_api_blueprint.route('/api/get-projects-by-user-id', methods=['GET'])
+def get_projects_by_user_id():
+    user_id = request.json['user_id']
+    user_projects = ProjectUser.query.filter_by(user_id=user_id)
+    project_ids = [project_user.to_json()['project_id'] for project_user in user_projects]
+
+    data = []
+    for row in Project.query.filter(Project.id.in_(project_ids)).all():
+        data.append(row.to_json())
+
+    response = jsonify(json_list=data)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+
+    return response
+
 
 @project_api_blueprint.route('/api/project/<project_id>/get-users-not-added', methods=['GET'])
 def get_users_not_added(project_id):
