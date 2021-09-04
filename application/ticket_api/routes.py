@@ -123,7 +123,7 @@ def delete_comment(comment_id):
 @ticket_api_blueprint.route('/api/ticket/<ticket_id>', methods=['DELETE'])
 def delete_ticket(ticket_id):
     ticket = Ticket.query.filter_by(id=ticket_id).first()
-    ticket.delete()
+    db.session.delete(ticket)
 
     db.session.commit()
 
