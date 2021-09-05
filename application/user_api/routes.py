@@ -49,7 +49,7 @@ def get_users_by_id():
     return response
 
 
-@user_api_blueprint.route('/api/user/create', methods=['POST'])
+@user_api_blueprint.route('/auth/user/create', methods=['POST'])
 def post_register():
     first_name = request.json['first_name']
     last_name = request.json['last_name']
@@ -76,7 +76,7 @@ def post_register():
     return response
 
 
-@user_api_blueprint.route('/api/user/login', methods=['POST'])
+@user_api_blueprint.route('/auth/user/login', methods=['POST'])
 def post_login():
     username = request.json['username']
     user = User.query.filter_by(username=username).first()
