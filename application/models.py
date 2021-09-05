@@ -18,14 +18,14 @@ class User(UserMixin, db.Model):
     api_key = db.Column(db.String(255), unique=True, nullable=True)
 
     def encode_api_key(self, key):
-        # self.api_key = sha256_crypt.hash(self.username + str(datetime.utcnow))
         self.api_key = jwt.encode(
-            {"username": self.username, "exp": 1900000000},
+            {"username": self.username, "is_admin": self.is_admin, "user_id": self.id, "exp": 1900000000},
             "freeuni_project_secret",
             # algorithm="HS256",
             headers={"alg": "HS256",
                      "typ": "JWT",
                      "kid": key})
+
 
     def encode_password(self):
         self.password = sha256_crypt.hash(self.password)
@@ -54,7 +54,7 @@ class Ticket(db.Model):
     assignee_id = db.Column(db.Integer, unique=False, nullable=False)
     status = db.Column(db.String(25), unique=False, nullable=False, default="In progress")
     project_id = db.Column(db.Integer, unique=False, nullable=False)
-    comments = db.relationship('TicketComment', backref='ticketComment')
+    # comments = db.relationship('TicketComment', backref='ticketComment')
 
     def __repr__(self):
         return '<Ticket %r>' % (self.title)
@@ -79,7 +79,7 @@ class Ticket(db.Model):
 
 class TicketComment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), unique=False, nullable=False)
+    ticket_id = db.Column(db.Integer, unique=False, nullable=False)
     user_id = db.Column(db.Integer, unique=False, nullable=False)
     comment = db.Column(db.String(255), unique=False, nullable=True, default="")
 
