@@ -7,7 +7,6 @@ from ..models import User
 from flask import make_response, request, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 import requests
-
 from passlib.hash import sha256_crypt
 
 
@@ -56,6 +55,7 @@ def post_register():
     last_name = request.json['last_name']
     email = request.json['email']
     username = request.json['username']
+    is_admin = request.json['is_admin']
 
     password = sha256_crypt.hash((str(request.json['password'])))
 
@@ -65,6 +65,7 @@ def post_register():
     user.last_name = last_name
     user.password = password
     user.username = username
+    user.is_admin = is_admin
     user.authenticated = True
 
     db.session.add(user)
@@ -90,6 +91,7 @@ def post_login():
     response = make_response(jsonify({'message': 'Not logged in'}), 401)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
 
 
 @user_api_blueprint.route('/api/user/logout', methods=['POST'])
