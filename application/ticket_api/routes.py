@@ -97,7 +97,7 @@ def put_ticket(ticket_id):
 
     publish('update_ticket_assignee', {"title" : ticket.title, "email" : get_user_email(ticket.assignee_id)}, 'mail_queue')
     publish('update_ticket_reporter', {"title" : ticket.title, "email" : get_user_email(ticket.reporter_id)}, 'mail_queue')
-    if ticket.status == 'Done':
+    if ticket.status.lower() == 'done':
         publish("done_ticket", ticket.to_json(), 'stat_queue')
     return response
 
