@@ -70,9 +70,8 @@ def get_users(project_id):
 
     return response
 
-@project_api_blueprint.route('/api/get-projects-by-user-id', methods=['GET'])
-def get_projects_by_user_id():
-    user_id = request.json['user_id']
+@project_api_blueprint.route('/api/<user_id>/get-projects-by-user-id', methods=['POST'])
+def get_projects_by_user_id(user_id):
     user_projects = ProjectUser.query.filter_by(user_id=user_id)
     project_ids = [project_user.to_json()['project_id'] for project_user in user_projects]
 
